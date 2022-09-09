@@ -1,5 +1,7 @@
 package model.entities;
 
+import modell.exceptions.DomainException;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -11,7 +13,10 @@ public class Reservation {
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-    public Reservation(Integer numeroQuarto, Date dataDeEntrada, Date dataDeSaida) {
+    public Reservation(Integer numeroQuarto, Date dataDeEntrada, Date dataDeSaida) throws DomainException {
+        if (!dataDeEntrada.after(dataDeSaida)) {
+            throw new DomainException("Error na reserva: Data de Saida deve ser posterior da Data de Entrada");
+        }
         this.numeroQuarto = numeroQuarto;
         this.dataDeEntrada = dataDeEntrada;
         this.dataDeSaida = dataDeSaida;
@@ -38,18 +43,17 @@ public class Reservation {
         return TimeUnit.DAYS.convert(dif,TimeUnit.MILLISECONDS);
     }
 
-    public String updateData(Date checkIn, Date checkOut){
+    public void updateData(Date checkIn, Date checkOut) throws DomainException{
 
         Date now = new Date();
         if(checkIn.before(now) || checkOut.before(now)){
-            return "Erro na Reserva: as reservas de atualização devem ser futuras.";
+            throw new DomainException("Erro na Reserva: as reservas de atualização devem ser futuras.");
         }
         if ( !checkOut.after(checkIn)) {
-            return "Error na reserva: Data de Saida deve ser posterior da Data de Entrada";
+            throw new DomainException("Error na reserva: Data de Saida deve ser posterior da Data de Entrada");
         }
         this.dataDeEntrada = checkIn;
         this.dataDeSaida = checkOut;
-        return null;
     }
 
     @Override
